@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An educational five-dimension digital health maturity self-assessment designed for BayCare Health System.">
+  <title>BayCare Digital Health Maturity Assessment</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23005B96'/%3E%3Cpath d='M29 14h6v15h15v6H35v15h-6V35H14v-6h15V14Z' fill='white'/%3E%3Ccircle cx='48' cy='16' r='6' fill='%2300A6A6'/%3E%3C/svg%3E">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --green: #005b96;
+      --green-dark: #003d66;
+      --green-soft: #e8f3f8;
+      --gold: #00a6a6;
+      --ink: #102a3a;
+      --muted: #526b78;
+      --line: #d5e2e8;
+      --surface: #ffffff;
+      --canvas: #f3f7f9;
+      --danger: #a33b32;
+      --shadow: 0 18px 55px rgba(0, 61, 102, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 92% 0%, rgba(0, 166, 166, 0.16), transparent 28rem),
+        linear-gradient(180deg, #f8fbfc 0%, var(--canvas) 100%);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    button, input { font: inherit; }
+
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid rgba(0, 91, 150, 0.35);
+      outline-offset: 3px;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 64px;
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      padding: 24px 0 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--green);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 820px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.1rem, 5vw, 4.6rem);
+      font-weight: 500;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+    }
+
+    .intro {
+      max-width: 760px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .time-note {
+      min-width: 170px;
+      padding: 18px 20px;
+      border: 1px solid rgba(0, 91, 150, 0.16);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.74);
+      box-shadow: 0 10px 32px rgba(12, 62, 45, 0.06);
+    }
+
+    .time-note strong {
+      display: block;
+      color: var(--green);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 2rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .time-note span { color: var(--muted); font-size: 0.88rem; }
+
+    .assessment {
+      overflow: hidden;
+      border: 1px solid rgba(0, 61, 102, 0.12);
+      border-radius: 28px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .assessment-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, #ffffff 0%, #f4f9f7 100%);
+    }
+
+    .progress-copy { display: flex; gap: 10px; align-items: baseline; }
+    .progress-copy strong { color: var(--green-dark); }
+    .progress-copy span { color: var(--muted); font-size: 0.9rem; }
+
+    .progress-track {
+      width: min(360px, 34vw);
+      height: 9px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #dfe9e5;
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), #1c8d69);
+      transition: width 220ms ease;
+    }
+
+    .dimension-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfb;
+    }
+
+    .dimension-tab {
+      position: relative;
+      min-height: 86px;
+      padding: 16px 14px 18px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .dimension-tab:last-child { border-right: 0; }
+
+    .dimension-tab::after {
+      position: absolute;
+      right: 14px;
+      bottom: 12px;
+      left: 14px;
+      height: 3px;
+      border-radius: 999px;
+      background: transparent;
+      content: "";
+    }
+
+    .dimension-tab.active {
+      background: var(--green-soft);
+      color: var(--green-dark);
+    }
+
+    .dimension-tab.active::after { background: var(--green); }
+
+    .dimension-tab.complete .tab-number {
+      border-color: var(--green);
+      background: var(--green);
+      color: #fff;
+    }
+
+    .tab-number {
+      display: inline-grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      margin-right: 7px;
+      border: 1px solid #afbbb6;
+      border-radius: 50%;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .tab-label {
+      display: inline;
+      font-size: 0.85rem;
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .assessment-body { padding: 34px clamp(20px, 5vw, 58px) 28px; }
+
+    .dimension-panel { display: none; }
+    .dimension-panel.active { display: block; animation: panel-in 180ms ease; }
+
+    @keyframes panel-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dimension-header {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 28px;
+    }
+
+    .dimension-mark {
+      display: grid;
+      width: 52px;
+      height: 52px;
+      place-items: center;
+      border-radius: 15px;
+      background: var(--green);
+      color: #fff;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.5rem;
+    }
+
+    h2, h3 { margin: 0; line-height: 1.15; }
+
+    h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.65rem, 3vw, 2.4rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .dimension-description { max-width: 760px; margin: 8px 0 0; color: var(--muted); }
+
+    .question-list { display: grid; gap: 22px; }
+
+    fieldset.question {
+      min-width: 0;
+      margin: 0;
+      padding: 0 0 24px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    fieldset.question:last-child { padding-bottom: 0; border-bottom: 0; }
+
+    legend {
+      width: 100%;
+      padding: 0;
+      color: var(--ink);
+      font-size: 1.02rem;
+      font-weight: 760;
+    }
+
+    .question-number {
+      margin-right: 8px;
+      color: var(--green);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .evidence-hint {
+      margin: 6px 0 13px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .options { display: grid; gap: 8px; }
+
+    .option {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 11px;
+      align-items: start;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .option:hover { border-color: #89a99d; transform: translateY(-1px); }
+    .option:has(input:checked) { border-color: var(--green); background: var(--green-soft); }
+
+    .option input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--green); }
+    .option-level { color: var(--green-dark); font-size: 0.75rem; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; }
+    .option-text { display: block; margin-top: 2px; color: #263630; font-size: 0.93rem; line-height: 1.42; }
+
+    .error-summary {
+      display: none;
+      margin: 0 0 24px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--danger);
+      border-radius: 8px;
+      background: #fff1ef;
+      color: #71281f;
+      font-weight: 650;
+    }
+
+    .error-summary.visible { display: block; }
+
+    .assessment-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 20px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      font-weight: 780;
+      cursor: pointer;
+    }
+
+    .button-primary { background: var(--green); color: #fff; }
+    .button-primary:hover { background: var(--green-dark); }
+    .button-secondary { border-color: var(--line); background: #fff; color: var(--ink); }
+    .button-secondary:hover { border-color: #91a39c; }
+    .button[hidden] { display: none; }
+
+    .results {
+      display: none;
+      margin-top: 32px;
+      border: 1px solid rgba(0, 61, 102, 0.15);
+      border-radius: 28px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .results.visible { display: block; }
+
+    .results-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      padding: 34px clamp(22px, 5vw, 54px);
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(120deg, #003f2e 0%, var(--green) 75%);
+      color: #fff;
+      border-radius: 27px 27px 0 0;
+    }
+
+    .results-hero .eyebrow { color: #e8dfb7; }
+
+    .results-hero h2 {
+      max-width: 780px;
+      color: #fff;
+      font-size: clamp(2rem, 4.2vw, 3.6rem);
+    }
+
+    .results-hero p { max-width: 760px; margin: 12px 0 0; color: rgba(255,255,255,0.78); }
+
+    .overall-score { min-width: 135px; text-align: right; }
+    .overall-score strong { display: block; font-family: Georgia, "Times New Roman", serif; font-size: 4rem; font-weight: 500; line-height: 0.9; }
+    .overall-score span { color: rgba(255,255,255,0.76); font-size: 0.84rem; }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 28px;
+      padding: 34px clamp(22px, 5vw, 54px);
+    }
+
+    .chart-card, .interpretation-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .chart-card { min-height: 510px; padding: 20px; }
+    .chart-wrap { position: relative; width: 100%; height: 400px; }
+
+    .chart-fallback {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #fff7dd;
+      color: #5d4a15;
+      font-size: 0.9rem;
+    }
+
+    .score-list { display: grid; gap: 9px; margin-top: 14px; }
+    .score-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; font-size: 0.9rem; }
+    .score-row strong { color: var(--green-dark); font-variant-numeric: tabular-nums; }
+
+    .interpretation-card { padding: 26px; background: #f8fbf9; }
+    .profile-label { color: var(--green); font-size: 0.78rem; font-weight: 850; letter-spacing: 0.11em; text-transform: uppercase; }
+    .interpretation-card h3 { margin-top: 6px; font-family: Georgia, "Times New Roman", serif; font-size: 2rem; font-weight: 500; }
+    .profile-description { margin: 14px 0 0; color: #36463f; }
+
+    .priority-block {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 14px;
+      background: var(--green);
+      color: #fff;
+    }
+
+    .priority-block strong { display: block; margin-bottom: 5px; color: #eadfae; font-size: 0.78rem; letter-spacing: 0.09em; text-transform: uppercase; }
+    .priority-block p { margin: 0; }
+
+    .low-dimensions { margin-top: 22px; }
+    .low-dimensions strong { display: block; margin-bottom: 8px; }
+    .low-dimensions ul { margin: 0; padding-left: 20px; color: var(--muted); }
+
+    .results-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 0 clamp(22px, 5vw, 54px) 38px;
+    }
+
+    .method-note {
+      margin: 26px 0 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .masthead { grid-template-columns: 1fr; }
+      .time-note { width: fit-content; }
+      .dimension-tabs { grid-template-columns: 1fr; }
+      .dimension-tab { min-height: 54px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .dimension-tab:last-child { border-bottom: 0; }
+      .dimension-tab::after { top: 11px; right: auto; bottom: 11px; left: 0; width: 4px; height: auto; }
+      .results-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 660px) {
+      .shell { width: min(100% - 20px, 1180px); padding-top: 12px; }
+      .assessment-top { grid-template-columns: 1fr; }
+      .progress-track { width: 100%; }
+      .assessment-body { padding: 26px 18px 22px; }
+      .dimension-header { grid-template-columns: 1fr; }
+      .dimension-mark { width: 46px; height: 46px; }
+      .assessment-actions { flex-direction: column-reverse; }
+      .button { width: 100%; }
+      .results-hero { grid-template-columns: 1fr; }
+      .overall-score { text-align: left; }
+      .chart-card { min-height: 450px; }
+      .chart-wrap { height: 330px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .shell { width: 100%; padding: 0; }
+      .masthead, .assessment, .results-actions, .method-note { display: none !important; }
+      .results { display: block !important; margin: 0; border: 0; box-shadow: none; }
+      .results-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Educational assessment designed for BayCare Health System</p>
+        <h1>Digital Health Maturity Assessment</h1>
+        <p class="intro">Evaluate how well BayCare could turn connected patient data, digital access, redesigned workflows, AI, and workforce adoption into safer and more dependable care. Answer all 20 questions using evidence that can be verified today.</p>
+      </div>
+      <aside class="time-note" aria-label="Estimated completion time">
+        <strong>8–10</strong>
+        <span>minutes to complete</span>
+      </aside>
+    </header>
+
+    <section class="assessment" aria-labelledby="assessment-title">
+      <h2 id="assessment-title" hidden>Assessment questions</h2>
+      <div class="assessment-top">
+        <div class="progress-copy" aria-live="polite">
+          <strong id="progress-count">0 of 20 answered</strong>
+          <span>All responses are required</span>
+        </div>
+        <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <nav class="dimension-tabs" id="dimension-tabs" aria-label="Assessment dimensions"></nav>
+      <form id="assessment-form" novalidate>
+        <div class="assessment-body">
+          <div class="error-summary" id="error-summary" role="alert" tabindex="-1"></div>
+          <div id="dimension-panels"></div>
+          <div class="assessment-actions">
+            <button class="button button-secondary" id="previous-button" type="button">Previous dimension</button>
+            <button class="button button-primary" id="next-button" type="button">Next dimension</button>
+            <button class="button button-primary" id="submit-button" type="submit" hidden>Calculate results</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section class="results" id="results" aria-labelledby="results-title" aria-live="polite">
+      <div class="results-hero">
+        <div>
+          <p class="eyebrow">Closest strategic profile</p>
+          <h2 id="results-title">Your results</h2>
+          <p id="results-summary"></p>
+        </div>
+        <div class="overall-score">
+          <strong id="overall-score">0.0</strong>
+          <span>overall average / 5</span>
+        </div>
+      </div>
+      <div class="results-grid">
+        <article class="chart-card" aria-labelledby="chart-title">
+          <h3 id="chart-title">Capability pattern</h3>
+          <div class="chart-wrap"><canvas id="maturity-chart" aria-label="Radar chart of five digital maturity dimension scores"></canvas></div>
+          <div class="chart-fallback" id="chart-fallback">The chart library could not load. Your scores remain available below.</div>
+          <div class="score-list" id="score-list"></div>
+        </article>
+        <article class="interpretation-card" aria-labelledby="profile-name">
+          <span class="profile-label">Interpretation</span>
+          <h3 id="profile-name"></h3>
+          <p class="profile-description" id="profile-description"></p>
+          <div class="priority-block">
+            <strong>Recommended next action</strong>
+            <p id="profile-action"></p>
+          </div>
+          <div class="low-dimensions">
+            <strong>Two lowest-scoring dimensions</strong>
+            <ul id="lowest-list"></ul>
+          </div>
+        </article>
+      </div>
+      <div class="results-actions">
+        <button class="button button-primary" type="button" id="print-button">Print results</button>
+        <button class="button button-secondary" type="button" id="restart-button">Start over</button>
+      </div>
+    </section>
+
+    <p class="method-note">Scores are the average of four equally weighted questions per dimension. This classroom diagnostic is independently designed and is not an official BayCare evaluation, accreditation, or ranking. It uses no patient information and stores no responses.</p>
+  </main>
+
+  <script>
+    const dimensions = [
+      {
+        key: "data",
+        name: "Patient Data & Interoperability",
+        shortName: "Patient Data",
+        description: "How consistently BayCare could connect, govern, and securely reuse clinical, operational, and patient-generated data across the continuum of care."
+      },
+      {
+        key: "channels",
+        name: "Digital Patient Experience",
+        shortName: "Patient Experience",
+        description: "How easily patients and caregivers could access coordinated, accessible, and measurable services across digital and human channels."
+      },
+      {
+        key: "operations",
+        name: "Clinical & Administrative Automation",
+        shortName: "Workflow Automation",
+        description: "How reliably BayCare could redesign and automate care and administrative workflows while preserving safety and human oversight."
+      },
+      {
+        key: "ai",
+        name: "AI, Analytics & Virtual Care",
+        shortName: "AI & Virtual Care",
+        description: "How safely BayCare could move analytics, AI, remote monitoring, and virtual care from pilots into measured production services."
+      },
+      {
+        key: "change",
+        name: "Leadership, Governance & Workforce Adoption",
+        shortName: "Adoption & Governance",
+        description: "How visibly leaders sponsor change, clarify clinical and digital decision rights, build workforce capability, and measure sustained adoption."
+      }
+    ];
+
+    const questions = [
+      {
+        id: "data-1", dimension: "data",
+        prompt: "How are patient records connected across hospitals, ambulatory sites, laboratories, imaging, pharmacy, home care, and billing?",
+        evidence: "Verify with interface inventories, architecture diagrams, interoperability standards, and reconciliation logs.",
+        options: [
+          { value: 1, text: "Key records remain in separate systems; staff locate and reconcile information manually." },
+          { value: 2, text: "Major systems exchange scheduled or point-to-point messages, but failures require manual follow-up." },
+          { value: 3, text: "Priority settings share a longitudinal record through documented interfaces with named owners and support procedures." },
+          { value: 4, text: "Standards-based connections provide timely data with lineage, automated quality checks, and service-level monitoring." },
+          { value: 5, text: "A governed interoperability platform securely supports real-time exchange, automated remediation, and reusable data services across the care continuum." }
+        ]
+      },
+      {
+        id: "data-2", dimension: "data",
+        prompt: "How are patient, provider, location, encounter, and clinical definitions kept consistent?",
+        evidence: "Look for enterprise identifiers, terminology standards, data dictionaries, stewards, and exception workflows.",
+        options: [
+          { value: 1, text: "Facilities use conflicting identifiers and definitions; duplicates are resolved case by case." },
+          { value: 2, text: "Some shared definitions exist, but matching and reconciliation depend on local expertise." },
+          { value: 3, text: "Priority entities have enterprise identifiers, approved definitions, terminology standards, and named stewards." },
+          { value: 4, text: "Master-data and terminology rules run automatically, and exceptions enter measured resolution workflows." },
+          { value: 5, text: "Identity, terminology, metadata, and access policies operate as reusable enterprise products with continuous quality improvement." }
+        ]
+      },
+      {
+        id: "data-3", dimension: "data",
+        prompt: "How are clinical notes, images, patient messages, device readings, and other unstructured data prepared for approved use?",
+        evidence: "Verify cataloging, retention, consent, de-identification, access controls, and governed analytical pipelines.",
+        options: [
+          { value: 1, text: "Unstructured data stays inside source systems and is extracted manually for isolated requests." },
+          { value: 2, text: "Teams create project-specific extracts without a shared catalog, preparation method, or reusable controls." },
+          { value: 3, text: "Priority sources are cataloged, retained consistently, and de-identified or access-controlled for approved uses." },
+          { value: 4, text: "Governed pipelines process priority text, image, message, and device data with quality and privacy monitoring." },
+          { value: 5, text: "Structured and unstructured data are securely combined through reusable services with automated policy enforcement and traceable consent." }
+        ]
+      },
+      {
+        id: "data-4", dimension: "data",
+        prompt: "How are data quality, privacy, and access problems detected, owned, and resolved?",
+        evidence: "Review quality dashboards, access reviews, issue logs, service levels, breach or incident processes, and root-cause records.",
+        options: [
+          { value: 1, text: "Problems are found by users or audits and fixed manually without consistent ownership or tracking." },
+          { value: 2, text: "Individual teams track recurring problems, but measures, escalation, and resolution times vary." },
+          { value: 3, text: "Critical data elements and access controls have owners, documented rules, and scheduled enterprise reporting." },
+          { value: 4, text: "Automated alerts identify failures, owners work against service levels, and recurring causes trigger remediation." },
+          { value: 5, text: "Preventive controls, continuous monitoring, and automated correction reduce failures while trend evidence drives redesign." }
+        ]
+      },
+
+      {
+        id: "channels-1", dimension: "channels",
+        prompt: "What share of common patient journeys can be completed digitally from start to finish?",
+        evidence: "Use completion data for finding care, scheduling, preregistration, virtual visits, test results, medication requests, and billing.",
+        options: [
+          { value: 1, text: "Fewer than 20% are digital end to end; most require phone, paper, or in-person follow-up." },
+          { value: 2, text: "20-49% are digital, but disconnected steps and manual follow-up remain common." },
+          { value: 3, text: "50-74% are digital end to end, with named owners and documented plans for priority gaps." },
+          { value: 4, text: "75-89% are digital end to end, and completion, abandonment, response, and resolution are measured." },
+          { value: 5, text: "At least 90% of eligible journeys are accessible digitally and continuously improved using outcome and experience evidence." }
+        ]
+      },
+      {
+        id: "channels-2", dimension: "channels",
+        prompt: "What happens when a patient moves among the BayCare app, portal, phone, virtual care, and an in-person location?",
+        evidence: "Test whether identity, context, appointment status, messages, and prior interactions follow the patient.",
+        options: [
+          { value: 1, text: "Channels operate separately; patients repeat information and staff cannot see prior interactions." },
+          { value: 2, text: "Some channels share notes or tickets, but continuity depends on manual copying or staff knowledge." },
+          { value: 3, text: "Priority services use a shared identity and case context across the main digital and human channels." },
+          { value: 4, text: "Most journeys preserve context across channels, with measured handoff, response, and resolution performance." },
+          { value: 5, text: "Patients move seamlessly across channels while governed orchestration routes each need to the safest and most convenient next interaction." }
+        ]
+      },
+      {
+        id: "channels-3", dimension: "channels",
+        prompt: "How are accessibility, language access, caregiver needs, and digital inclusion built into patient services?",
+        evidence: "Check accessibility audits, multilingual support, proxy access, usability tests, broadband or device barriers, and remediation backlogs.",
+        options: [
+          { value: 1, text: "Barriers are addressed mainly after complaints or compliance findings." },
+          { value: 2, text: "New services receive checklist reviews, but existing journeys and real patient performance are rarely tested." },
+          { value: 3, text: "Priority journeys undergo scheduled accessibility and usability testing with documented remediation owners." },
+          { value: 4, text: "Monitoring and patient research measure accessibility, language, caregiver, and digital-inclusion outcomes across major journeys." },
+          { value: 5, text: "Inclusive design is embedded in product teams, and evidence about underserved groups continuously determines priorities." }
+        ]
+      },
+      {
+        id: "channels-4", dimension: "channels",
+        prompt: "How does BayCare measure and improve the digital patient experience?",
+        evidence: "Review task completion, abandonment, response time, complaints, satisfaction, clinical follow-through, and improvement experiments.",
+        options: [
+          { value: 1, text: "Success is inferred from website traffic, app downloads, or general satisfaction scores." },
+          { value: 2, text: "Some teams track channel activity, but measures are not connected across the patient journey." },
+          { value: 3, text: "Priority journeys have baselines, outcome targets, named owners, and scheduled performance reviews." },
+          { value: 4, text: "Journey dashboards connect experience measures to access, adherence, resolution, and clinical follow-through." },
+          { value: 5, text: "Cross-functional teams continuously test personalized improvements while monitoring safety, equity, and unintended effects." }
+        ]
+      },
+
+      {
+        id: "operations-1", dimension: "operations",
+        prompt: "How are cross-functional workflows such as referrals, prior authorization, care transitions, discharge, and billing resolution managed?",
+        evidence: "Use current process maps, end-to-end ownership, queue data, exception records, and handoff measures.",
+        options: [
+          { value: 1, text: "Work moves through calls, faxes, email, paper, or spreadsheets without end-to-end ownership." },
+          { value: 2, text: "Departments use local workflow tools, but cross-setting handoffs remain manual and difficult to track." },
+          { value: 3, text: "Priority workflows have end-to-end owners, documented stages, shared queues, and standard exception handling." },
+          { value: 4, text: "Integrated workflows automate routine handoffs and expose real-time cycle time, backlog, safety, and exception measures." },
+          { value: 5, text: "Teams continuously redesign workflows using outcomes, process-mining evidence, staff input, and controlled experiments." }
+        ]
+      },
+      {
+        id: "operations-2", dimension: "operations",
+        prompt: "How are routine administrative decisions and low-risk approvals automated?",
+        evidence: "Examine eligibility or routing rules, approval thresholds, audit trails, exception rates, and human-override controls.",
+        options: [
+          { value: 1, text: "Nearly all decisions and approvals are manual, including repeatable low-risk cases." },
+          { value: 2, text: "Simple approvals are automated in a few departments, but rules and audit records are inconsistent." },
+          { value: 3, text: "Documented rules automate common low-risk decisions with audit trails and defined human escalation." },
+          { value: 4, text: "Decision services operate across major workflows with monitored accuracy, turnaround, exceptions, and overrides." },
+          { value: 5, text: "Rules and models are continuously improved from outcome evidence under formal safety, risk, and change controls." }
+        ]
+      },
+      {
+        id: "operations-3", dimension: "operations",
+        prompt: "How does workflow technology reduce clinical burden without weakening safety?",
+        evidence: "Review alert burden, documentation time, usability, overrides, safety events, clinician feedback, and time returned to care.",
+        options: [
+          { value: 1, text: "Technology adds steps or alerts, and burden is known mainly through informal complaints." },
+          { value: 2, text: "Individual units simplify selected tasks, but burden and safety effects are not measured consistently." },
+          { value: 3, text: "Priority workflows have burden and safety baselines, clinician owners, usability testing, and defined escalation paths." },
+          { value: 4, text: "Dashboards connect adoption, time, overrides, alert burden, safety, and care outcomes to corrective action." },
+          { value: 5, text: "Human-factors evidence and continuous experiments systematically remove low-value work while preserving clinical safeguards." }
+        ]
+      },
+      {
+        id: "operations-4", dimension: "operations",
+        prompt: "How are automation opportunities selected, governed, and reviewed after launch?",
+        evidence: "Review the portfolio, process evidence, safety assessment, expected benefits, accountable owners, and post-launch results.",
+        options: [
+          { value: 1, text: "Automation begins when a department buys a tool or creates a workaround." },
+          { value: 2, text: "A central team accepts requests, but prioritization focuses mainly on technical feasibility or demand." },
+          { value: 3, text: "Candidates require a process map, safety and risk review, named owner, and measurable expected benefit." },
+          { value: 4, text: "A governed portfolio prioritizes patient and operational value and verifies benefits after deployment." },
+          { value: 5, text: "The portfolio continuously reallocates investment using realized value, safety evidence, risk, and reusable components." }
+        ]
+      },
+
+      {
+        id: "ai-1", dimension: "ai",
+        prompt: "How broadly are AI and advanced analytics used in routine clinical or operational decisions?",
+        evidence: "Count deployed use cases with accountable owners, active users, defined decision roles, monitoring, and measured outcomes.",
+        options: [
+          { value: 1, text: "Use is limited to personal experiments or demonstrations with no production ownership." },
+          { value: 2, text: "A few pilots exist, but outputs rarely enter routine decisions or workflows." },
+          { value: 3, text: "Several production use cases support defined workflows with clinical, operational, and technical owners." },
+          { value: 4, text: "Multiple service lines use monitored AI or analytics with documented value, safety controls, and human oversight." },
+          { value: 5, text: "AI and analytics operate as reusable enterprise capabilities continuously expanded through a governed portfolio." }
+        ]
+      },
+      {
+        id: "ai-2", dimension: "ai",
+        prompt: "How are AI systems evaluated before release and monitored afterward?",
+        evidence: "Look for representative datasets, clinical validation, approval gates, drift and bias monitoring, incident response, and periodic review.",
+        options: [
+          { value: 1, text: "Users rely on informal spot checks; there are no shared evaluation criteria or release gates." },
+          { value: 2, text: "Teams manually test selected outputs, but methods, results, and post-launch monitoring are inconsistent." },
+          { value: 3, text: "Production systems pass documented evaluations for performance, privacy, safety, bias, and workflow fit before release." },
+          { value: 4, text: "Pre-release tests and continuous monitoring detect regression, drift, cost, bias, and harmful outcome patterns." },
+          { value: 5, text: "Evaluation infrastructure uses versioned tests, accountable owners, enforced gates, and continuous learning across use cases." }
+        ]
+      },
+      {
+        id: "ai-3", dimension: "ai",
+        prompt: "How integrated are virtual care, hospital-at-home, and remote monitoring with everyday care delivery?",
+        evidence: "Review eligibility rules, device and data integration, escalation protocols, capacity, outcomes, equity, and transitions to in-person care.",
+        options: [
+          { value: 1, text: "Virtual services are isolated experiments or standalone visits with manual follow-up." },
+          { value: 2, text: "Selected programs operate, but enrollment, data flow, escalation, and outcome measurement vary." },
+          { value: 3, text: "Priority programs use documented eligibility, integrated records, clinical ownership, and standard escalation protocols." },
+          { value: 4, text: "Virtual and in-person capacity is coordinated using real-time monitoring of safety, access, outcomes, and utilization." },
+          { value: 5, text: "Care settings are dynamically orchestrated around patient need, with continuous improvement of outcomes, equity, experience, and cost." }
+        ]
+      },
+      {
+        id: "ai-4", dimension: "ai",
+        prompt: "How are AI, analytics, and virtual-care investments selected, funded, scaled, and stopped?",
+        evidence: "Review portfolio criteria, risk tiers, evaluation plans, stage gates, outcome measures, and sunset decisions.",
+        options: [
+          { value: 1, text: "Projects begin from individual enthusiasm or vendor demonstrations without a shared selection process." },
+          { value: 2, text: "Pilots receive temporary funding, but success criteria, ownership, and stop decisions are unclear." },
+          { value: 3, text: "Each use case requires a defined care or business problem, owner, risk tier, evaluation plan, and expected outcome." },
+          { value: 4, text: "A clinical, operational, technology, and compliance portfolio uses evidence to scale, revise, or stop initiatives." },
+          { value: 5, text: "Funding continuously shifts toward validated value while reusable platforms and shared lessons reduce experimentation cost." }
+        ]
+      },
+
+      {
+        id: "change-1", dimension: "change",
+        prompt: "How visibly do senior and clinical leaders sponsor digital health transformation?",
+        evidence: "Verify time commitments, decision participation, budget choices, role modeling, and repeated communication rather than statements of support.",
+        options: [
+          { value: 1, text: "Leaders delegate change to IT or a project team and appear mainly at launch events." },
+          { value: 2, text: "Sponsors are named, but participation is irregular and difficult decisions return to committees." },
+          { value: 3, text: "Named executive and clinical leaders review adoption, safety, and outcomes on a fixed cadence and remove barriers." },
+          { value: 4, text: "Leaders use the capabilities, spend time with affected teams, and tie resources and accountability to adoption evidence." },
+          { value: 5, text: "Leadership behavior, incentives, succession, and investment routines consistently reinforce continuous digital improvement." }
+        ]
+      },
+      {
+        id: "change-2", dimension: "change",
+        prompt: "How clear are decision rights for digital platforms, patient data, automation, AI, and clinical safety?",
+        evidence: "Review governance charters, clinical ownership, approval records, risk tiers, escalation paths, and decision turnaround times.",
+        options: [
+          { value: 1, text: "Facilities and functions make independent decisions; conflicts are resolved through informal escalation." },
+          { value: 2, text: "Committees exist, but mandates overlap and decisions frequently stall or get revisited." },
+          { value: 3, text: "Governance bodies have documented scopes, accountable clinical and business owners, escalation paths, and recorded decisions." },
+          { value: 4, text: "Decision speed and outcomes are measured, routine approvals are delegated, and governance scales with risk." },
+          { value: 5, text: "Federated governance enables rapid local learning within continuously monitored enterprise safety, privacy, and architecture guardrails." }
+        ]
+      },
+      {
+        id: "change-3", dimension: "change",
+        prompt: "How are workforce training, proficiency, and adoption managed after a digital capability launches?",
+        evidence: "Use role-based learning plans, proficiency checks, usage and override data, leader accountability, support demand, and workflow outcomes.",
+        options: [
+          { value: 1, text: "Training is a one-time demonstration, and adoption is assumed after go-live." },
+          { value: 2, text: "Completion is tracked, but leaders are not accountable for proficiency or workflow change." },
+          { value: 3, text: "Role-based training, at-the-elbow support, usage measures, and named adoption owners continue after launch." },
+          { value: 4, text: "Leaders are measured on adoption and outcomes; low-adoption teams receive targeted coaching and workflow redesign." },
+          { value: 5, text: "Learning, simulation, adoption analytics, peer networks, and improvement operate as one continuous workforce system." }
+        ]
+      },
+      {
+        id: "change-4", dimension: "change",
+        prompt: "How safely can team members raise concerns, report failures, and test better ways of working?",
+        evidence: "Review safety and incident reporting, listening sessions, experiment records, protections, response times, and lessons shared.",
+        options: [
+          { value: 1, text: "People avoid raising problems or experimenting because mistakes are blamed on individuals." },
+          { value: 2, text: "Leaders invite feedback, but concerns rarely produce visible action and experimentation depends on local managers." },
+          { value: 3, text: "Teams have protected reporting channels, documented responses, and defined spaces for low-risk experimentation." },
+          { value: 4, text: "Leaders share lessons from failures, protect responsible experiments, and track whether concerns are resolved." },
+          { value: 5, text: "Psychological safety, just-culture practices, rapid issue resolution, and enterprise learning reinforce continuous improvement." }
+        ]
+      }
+    ];
+
+    const profiles = {
+      foundation: {
+        name: "Foundation First",
+        description: "Capability is low across most dimensions. BayCare may be funding isolated tools without the shared data, workflow ownership, safety controls, or repeatable change system needed to scale them.",
+        action: "Select one executive- and clinical-owner patient journey, map it end to end, and establish the data, workflow, safety, and adoption foundation needed to improve it."
+      },
+      frontier: {
+        name: "Connected Care Leader",
+        description: "Capability is high across all five dimensions. The strategic challenge is sustaining innovation while preventing mature platforms and governance from slowing responsible experimentation.",
+        action: "Create a controlled frontier portfolio for higher-risk AI, virtual-care, and patient-experience experiments with explicit safety, equity, value, and sunset criteria."
+      },
+      fragileData: {
+        name: "Digital Front Door, Fragile Data",
+        description: "Patient-facing services and automation are advancing faster than the data foundation beneath them. Inconsistent identities, definitions, and lineage will limit safe personalization, analytics, and automation.",
+        action: "Fund an enterprise patient-data and interoperability product with named stewards, terminology standards, quality service levels, and a plan to retire duplicate interfaces."
+      },
+      digitalized: {
+        name: "Access Without Intelligence",
+        description: "Digital patient access is strong, but AI, analytics, and virtual-care integration remain weak. BayCare may have improved convenience without yet converting interaction and clinical data into better decisions and proactive care.",
+        action: "Choose one high-volume digital journey and deploy a governed analytics or AI use case tied to access, adherence, resolution, safety, or clinical outcomes."
+      },
+      executionGap: {
+        name: "Capability Without Adoption",
+        description: "Platforms and technical capability have outrun workforce adoption and governance. New tools may launch while clinicians and staff retain old workarounds or inconsistent local practices.",
+        action: "Make executive, clinical, and operational leaders accountable for adoption outcomes, provide role-based support, and embed change leaders in the highest-friction workflows."
+      }
+    };
+
+    let currentDimensionIndex = 0;
+    let chartInstance = null;
+
+    const form = document.getElementById("assessment-form");
+    const panelsRoot = document.getElementById("dimension-panels");
+    const tabsRoot = document.getElementById("dimension-tabs");
+    const previousButton = document.getElementById("previous-button");
+    const nextButton = document.getElementById("next-button");
+    const submitButton = document.getElementById("submit-button");
+    const errorSummary = document.getElementById("error-summary");
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderAssessment() {
+      tabsRoot.innerHTML = dimensions.map((dimension, index) => `
+        <button class="dimension-tab${index === 0 ? " active" : ""}" type="button" data-index="${index}" aria-controls="panel-${dimension.key}" aria-current="${index === 0 ? "step" : "false"}">
+          <span class="tab-number">${index + 1}</span><span class="tab-label">${escapeHtml(dimension.shortName)}</span>
+        </button>
+      `).join("");
+
+      panelsRoot.innerHTML = dimensions.map((dimension, dimensionIndex) => {
+        const dimensionQuestions = questions.filter(question => question.dimension === dimension.key);
+        return `
+          <section class="dimension-panel${dimensionIndex === 0 ? " active" : ""}" id="panel-${dimension.key}" data-index="${dimensionIndex}" aria-labelledby="heading-${dimension.key}">
+            <div class="dimension-header">
+              <div class="dimension-mark" aria-hidden="true">${dimensionIndex + 1}</div>
+              <div>
+                <h2 id="heading-${dimension.key}">${escapeHtml(dimension.name)}</h2>
+                <p class="dimension-description">${escapeHtml(dimension.description)}</p>
+              </div>
+            </div>
+            <div class="question-list">
+              ${dimensionQuestions.map((question, questionIndex) => `
+                <fieldset class="question" id="field-${question.id}">
+                  <legend><span class="question-number">${dimensionIndex + 1}.${questionIndex + 1}</span>${escapeHtml(question.prompt)}</legend>
+                  <p class="evidence-hint">Evidence to check: ${escapeHtml(question.evidence)}</p>
+                  <div class="options">
+                    ${question.options.map(option => `
+                      <label class="option">
+                        <input type="radio" name="${question.id}" value="${option.value}">
+                        <span><span class="option-level">Stage ${option.value}</span><span class="option-text">${escapeHtml(option.text)}</span></span>
+                      </label>
+                    `).join("")}
+                  </div>
+                </fieldset>
+              `).join("")}
+            </div>
+          </section>
+        `;
+      }).join("");
+
+      tabsRoot.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => showDimension(Number(button.dataset.index)));
+      });
+
+      form.addEventListener("change", updateProgress);
+      updateNavigation();
+      updateProgress();
+    }
+
+    function showDimension(index) {
+      currentDimensionIndex = Math.max(0, Math.min(dimensions.length - 1, index));
+      document.querySelectorAll(".dimension-panel").forEach((panel, panelIndex) => {
+        panel.classList.toggle("active", panelIndex === currentDimensionIndex);
+      });
+      tabsRoot.querySelectorAll(".dimension-tab").forEach((tab, tabIndex) => {
+        const active = tabIndex === currentDimensionIndex;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-current", active ? "step" : "false");
+      });
+      errorSummary.classList.remove("visible");
+      updateNavigation();
+      document.querySelector(".assessment").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function updateNavigation() {
+      previousButton.hidden = currentDimensionIndex === 0;
+      const last = currentDimensionIndex === dimensions.length - 1;
+      nextButton.hidden = last;
+      submitButton.hidden = !last;
+    }
+
+    function answeredCount() {
+      return questions.filter(question => form.elements[question.id].value).length;
+    }
+
+    function dimensionIsComplete(key) {
+      return questions.filter(question => question.dimension === key).every(question => form.elements[question.id].value);
+    }
+
+    function updateProgress() {
+      const count = answeredCount();
+      document.getElementById("progress-count").textContent = `${count} of ${questions.length} answered`;
+      document.getElementById("progress-bar").style.width = `${(count / questions.length) * 100}%`;
+      tabsRoot.querySelectorAll(".dimension-tab").forEach((tab, index) => {
+        tab.classList.toggle("complete", dimensionIsComplete(dimensions[index].key));
+      });
+    }
+
+    function validateCurrentDimension() {
+      const key = dimensions[currentDimensionIndex].key;
+      const missing = questions.filter(question => question.dimension === key && !form.elements[question.id].value);
+      if (!missing.length) return true;
+      errorSummary.textContent = `Answer all ${missing.length} remaining question${missing.length === 1 ? "" : "s"} in this dimension before continuing.`;
+      errorSummary.classList.add("visible");
+      errorSummary.focus();
+      return false;
+    }
+
+    previousButton.addEventListener("click", () => showDimension(currentDimensionIndex - 1));
+    nextButton.addEventListener("click", () => {
+      if (validateCurrentDimension()) showDimension(currentDimensionIndex + 1);
+    });
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const firstMissing = questions.find(question => !form.elements[question.id].value);
+      if (firstMissing) {
+        const index = dimensions.findIndex(dimension => dimension.key === firstMissing.dimension);
+        showDimension(index);
+        errorSummary.textContent = "Every question must be answered before results can be calculated.";
+        errorSummary.classList.add("visible");
+        errorSummary.focus();
+        return;
+      }
+      displayResults(calculateScores());
+    });
+
+    function calculateScores() {
+      return Object.fromEntries(dimensions.map(dimension => {
+        const values = questions
+          .filter(question => question.dimension === dimension.key)
+          .map(question => Number(form.elements[question.id].value));
+        const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+        return [dimension.key, Number(average.toFixed(2))];
+      }));
+    }
+
+    function selectProfile(scores) {
+      const values = dimensions.map(dimension => scores[dimension.key]);
+      const allLow = values.every(value => value <= 2.25);
+      const allHigh = values.every(value => value >= 4);
+      const othersWithoutChange = [scores.data, scores.channels, scores.operations, scores.ai];
+      const othersWithoutData = [scores.channels, scores.operations, scores.ai, scores.change];
+      const avgWithoutChange = othersWithoutChange.reduce((a, b) => a + b, 0) / othersWithoutChange.length;
+      const avgWithoutData = othersWithoutData.reduce((a, b) => a + b, 0) / othersWithoutData.length;
+
+      if (allLow) return profiles.foundation;
+      if (allHigh) return profiles.frontier;
+      if (scores.change <= avgWithoutChange - 0.75) return profiles.executionGap;
+      if (scores.channels >= 3.5 && scores.ai <= 2.75 && scores.channels - scores.ai >= 0.75) return profiles.digitalized;
+      if (scores.data <= avgWithoutData - 0.75) return profiles.fragileData;
+
+      const ideals = {
+        foundation: [1.75, 1.75, 1.75, 1.75, 1.75],
+        frontier: [4.5, 4.5, 4.5, 4.5, 4.5],
+        fragileData: [1.8, 3.5, 3.3, 3.0, 3.1],
+        digitalized: [3.2, 4.2, 3.2, 2.0, 3.0],
+        executionGap: [3.5, 3.5, 3.5, 3.2, 1.8]
+      };
+      const distances = Object.entries(ideals).map(([key, ideal]) => ({
+        key,
+        distance: ideal.reduce((sum, target, index) => sum + Math.pow(values[index] - target, 2), 0)
+      }));
+      distances.sort((a, b) => a.distance - b.distance);
+      return profiles[distances[0].key];
+    }
+
+    function stageLabel(score) {
+      const stage = Math.max(1, Math.min(5, Math.round(score)));
+      return ["", "Ad Hoc", "Developing", "Defined", "Managed", "Optimizing"][stage];
+    }
+
+    function displayResults(scores) {
+      const sorted = dimensions
+        .map((dimension, index) => ({ ...dimension, score: scores[dimension.key], index }))
+        .sort((a, b) => a.score - b.score || a.index - b.index);
+      const lowest = sorted.slice(0, 2);
+      const profile = selectProfile(scores);
+      const overall = dimensions.reduce((sum, dimension) => sum + scores[dimension.key], 0) / dimensions.length;
+
+      document.getElementById("results-title").textContent = profile.name;
+      document.getElementById("profile-name").textContent = profile.name;
+      document.getElementById("profile-description").textContent = profile.description;
+      document.getElementById("profile-action").textContent = profile.action;
+      document.getElementById("overall-score").textContent = overall.toFixed(1);
+      document.getElementById("results-summary").textContent = `Your closest score-pattern match is ${profile.name}. Use the two lowest dimensions to begin an evidence-based investment discussion, not as an official BayCare grade.`;
+      document.getElementById("lowest-list").innerHTML = lowest.map(item => `<li>${escapeHtml(item.name)}: ${item.score.toFixed(1)} (${stageLabel(item.score)})</li>`).join("");
+      document.getElementById("score-list").innerHTML = dimensions.map(dimension => `
+        <div class="score-row"><span>${escapeHtml(dimension.name)}</span><strong>${scores[dimension.key].toFixed(1)} · ${stageLabel(scores[dimension.key])}</strong></div>
+      `).join("");
+
+      renderChart(scores);
+      const results = document.getElementById("results");
+      results.classList.add("visible");
+      results.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function renderChart(scores) {
+      const fallback = document.getElementById("chart-fallback");
+      if (chartInstance) chartInstance.destroy();
+      if (typeof Chart === "undefined") {
+        fallback.style.display = "block";
+        return;
+      }
+      fallback.style.display = "none";
+      const ctx = document.getElementById("maturity-chart");
+      chartInstance = new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: dimensions.map(dimension => dimension.shortName),
+          datasets: [{
+            label: "Maturity score",
+            data: dimensions.map(dimension => scores[dimension.key]),
+            backgroundColor: "rgba(0, 166, 166, 0.18)",
+            borderColor: "#005b96",
+            borderWidth: 3,
+            pointBackgroundColor: "#00a6a6",
+            pointBorderColor: "#005b96",
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 450 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: context => ` ${context.raw.toFixed(1)} / 5` }
+            }
+          },
+          scales: {
+            r: {
+              min: 0,
+              max: 5,
+              beginAtZero: true,
+              ticks: { stepSize: 1, backdropColor: "transparent", color: "#66736e", showLabelBackdrop: false },
+              grid: { color: "rgba(0, 61, 102, 0.14)" },
+              angleLines: { color: "rgba(0, 61, 102, 0.14)" },
+              pointLabels: { color: "#20332c", font: { size: 13, weight: "600" } }
+            }
+          }
+        }
+      });
+    }
+
+    document.getElementById("print-button").addEventListener("click", () => window.print());
+    document.getElementById("restart-button").addEventListener("click", () => {
+      form.reset();
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = null;
+      document.getElementById("results").classList.remove("visible");
+      showDimension(0);
+      updateProgress();
+    });
+
+    renderAssessment();
+  </script>
+</body>
+</html>
